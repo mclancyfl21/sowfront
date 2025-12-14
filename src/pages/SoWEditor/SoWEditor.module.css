@@ -54,4 +54,13 @@
   z-index: 1000;
 }
 
+.selectedFileDisplay {
+  text-align: right;
+  margin-top: -10px; /* Adjust as needed to align with action bar */
+  margin-bottom: 15px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+
 

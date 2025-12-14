@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react'; // Import useState
 import { useSoWForm } from '../../hooks/useSoWForm';
 import FormField from '../../components/FormField/FormField';
 import ActionBar from '../../components/ActionBar/ActionBar';
@@ -13,13 +13,15 @@ const SoWEditor = () => {
     handleLockToggle, 
     updateAllFormData, 
     getExportData,
-    isLoading,        // Get isLoading state
-    startLoading,     // Get startLoading function
-    stopLoading       // Get stopLoading function
+    isLoading,
+    startLoading,
+    stopLoading       
   } = useSoWForm();
 
+  const [selectedTemplateFile, setSelectedTemplateFile] = useState(null); // State for template file
+
   const handleImport = async (file) => {
-    startLoading(); // Start loading
+    startLoading();
     try {
       if (file) {
         const jsonData = await importJsonFile(file);
@@ -30,12 +32,12 @@ const SoWEditor = () => {
       alert(error.message);
       console.error("JSON import error:", error);
     } finally {
-      stopLoading(); // Stop loading
+      stopLoading();
     }
   };
 
   const handleExport = () => {
-    startLoading(); // Start loading
+    startLoading();
     try {
       const dataToExport = getExportData();
       const jsonString = JSON.stringify(dataToExport, null, 2);
@@ -53,21 +55,32 @@ const SoWEditor = () => {
       alert('Error exporting JSON: ' + error.message);
       console.error("JSON export error:", error);
     } finally {
-      stopLoading(); // Stop loading
+      stopLoading();
     }
   };
 
+  const handleTemplateFileSelect = (file) => {
+    setSelectedTemplateFile(file);
+    alert(`Template selected: ${file ? file.name : 'None'}`);
+  };
+
   const handleGenerateDocument = () => {
-    startLoading(); // Start loading
+    startLoading();
     try {
+      if (!selectedTemplateFile) {
+        alert('Please select a DOCX template file first!');
+        return; // Exit if no template
+      }
       // Placeholder for actual Lambda call
       alert('Generate Document functionality not yet implemented.');
       console.log("Current data for generation:", getExportData());
+      console.log("Selected template file:", selectedTemplateFile);
+
     } catch (error) {
       alert('Error generating document: ' + error.message);
       console.error("Document generation error:", error);
     } finally {
-      stopLoading(); // Stop loading
+      stopLoading();
     }
   };
 
@@ -75,14 +88,21 @@ const SoWEditor = () => {
     <div className={styles.soWEditor}>
       <h1>Statement of Work Editor</h1>
 
-      {isLoading && <div className={styles.loadingIndicator}>Loading...</div>} {/* Loading indicator */}
+      {isLoading && <div className={styles.loadingIndicator}>Loading...</div>}
 
       <ActionBar
         onImportJson={handleImport}
         onExportJson={handleExport}
         onGenerateDocument={handleGenerateDocument}
-        isLoading={isLoading} // Pass isLoading to ActionBar
+        onTemplateFileSelect={handleTemplateFileSelect} // Pass handler for template selection
+        isLoading={isLoading}
       />
+
+      {selectedTemplateFile && (
+        <p className={styles.selectedFileDisplay}>
+          Selected Template: <strong>{selectedTemplateFile.name}</strong>
+        </p>
+      )}
 
       <div className={styles.formGrid}>
         {Object.entries(formData).map(([key, field]) => (
