@@ -1,0 +1,32 @@
+.actionBar {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+  justify-content: flex-end; /* Align buttons to the right */
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.actionButton {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s;
+  text-decoration: none; /* For label acting as button */
+  display: inline-flex; /* To center text if icon is added later */
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover {
+  background-color: #0056b3;
+}
+
+/* Specific style for file input label to look like a button */
+.actionButton input[type="file"] {
+  display: none;
+}

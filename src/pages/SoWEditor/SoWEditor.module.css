@@ -1,0 +1,57 @@
+.soWEditor {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.soWEditor h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.actionBar {
+  display: flex;
+  justify-content: flex-end; /* Align to the right for now */
+  margin-bottom: 20px;
+}
+
+.importButton {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s;
+  text-decoration: none; /* In case it's a link or label */
+}
+
+.importButton:hover {
+  background-color: #0056b3;
+}
+
+.loadingIndicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 2em;
+  z-index: 1000;
+}
+
+
