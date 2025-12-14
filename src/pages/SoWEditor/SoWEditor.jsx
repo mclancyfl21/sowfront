@@ -8,6 +8,7 @@ import { importJsonFile } from '../../lib/jsonUtils';
 import styles from './SoWEditor.module.css';
 
 const SoWEditor = () => {
+  const LAMBDA_FUNCTION_URL = "https://53uvloqwozv6ziyzsgi2mt67iu0xmwuh.lambda-url.us-west-1.on.aws/";
   const { 
     formData, 
     handleFieldChange, 
@@ -67,17 +68,79 @@ const SoWEditor = () => {
     alert(`Template selected: ${file ? file.name : 'None'}`);
   };
 
-  const handleGenerateDocument = () => {
+  const handleGenerateDocument = async () => {
     startLoading();
     try {
       if (!selectedTemplateFile) {
         alert('Please select a DOCX template file first!');
         return;
       }
-      // Placeholder for actual Lambda call
-      alert('Generate Document functionality not yet implemented.');
-      console.log("Current data for generation:", getExportData());
-      console.log("Selected template file:", selectedTemplateFile);
+
+      // Read the DOCX file as ArrayBuffer
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(selectedTemplateFile);
+
+      reader.onload = async (event) => {
+        const arrayBuffer = event.target.result;
+        // Convert ArrayBuffer to Uint8Array
+        const uint8Array = new Uint8Array(arrayBuffer);
+        // Convert Uint8Array to binary string
+        let binaryString = '';
+        uint8Array.forEach((byte) => {
+          binaryString += String.fromCharCode(byte);
+        });
+        // Base64 encode the binary string
+        const base64Docx = btoa(binaryString);
+
+        // Get current SoW data
+        const sowData = getExportData();
+
+        const payload = {
+          sow_data: sowData,
+          template_docx_base64: base64Docx,
+        };
+
+        const response = await fetch(LAMBDA_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Lambda invocation failed: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        if (result.file_content_base64) {
+          // Decode the base64 DOCX content returned from Lambda
+          const decodedDocxBytes = atob(result.file_content_base64);
+          const docxUint8Array = new Uint8Array(decodedDocxBytes.length);
+          for (let i = 0; i < decodedDocxBytes.length; i++) {
+            docxUint8Array[i] = decodedDocxBytes.charCodeAt(i);
+          }
+          const blob = new Blob([docxUint8Array], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+          
+          // Trigger download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = result.file_name || 'generated_sow.docx';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          alert('Document generated and downloaded successfully!');
+        } else {
+          throw new Error('No generated document content received from Lambda.');
+        }
+      };
+
+      reader.onerror = (error) => {
+        throw new Error('Error reading template file: ' + error);
+      };
 
     } catch (error) {
       alert('Error generating document: ' + error.message);
