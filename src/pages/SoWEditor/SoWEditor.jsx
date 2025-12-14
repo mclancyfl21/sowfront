@@ -2,6 +2,7 @@ import React, { useState } from 'react'; // Import useState
 import { useSoWForm } from '../../hooks/useSoWForm';
 import FormField from '../../components/FormField/FormField';
 import ActionBar from '../../components/ActionBar/ActionBar';
+import ExpandableModal from '../../components/ExpandableModal/ExpandableModal'; // Import ExpandableModal
 import { importJsonFile } from '../../lib/jsonUtils';
 
 import styles from './SoWEditor.module.css';
@@ -18,7 +19,9 @@ const SoWEditor = () => {
     stopLoading       
   } = useSoWForm();
 
-  const [selectedTemplateFile, setSelectedTemplateFile] = useState(null); // State for template file
+  const [selectedTemplateFile, setSelectedTemplateFile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [editingFieldKey, setEditingFieldKey] = useState(null); // State for which field is being edited
 
   const handleImport = async (file) => {
     startLoading();
@@ -69,7 +72,7 @@ const SoWEditor = () => {
     try {
       if (!selectedTemplateFile) {
         alert('Please select a DOCX template file first!');
-        return; // Exit if no template
+        return;
       }
       // Placeholder for actual Lambda call
       alert('Generate Document functionality not yet implemented.');
@@ -84,6 +87,28 @@ const SoWEditor = () => {
     }
   };
 
+  // New: Handlers for modal
+  const handleExpandRequest = (key) => {
+    setEditingFieldKey(key);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingFieldKey(null);
+  };
+
+  const handleModalSave = (newValue) => {
+    handleFieldChange(editingFieldKey, newValue); // Update the form data
+    setIsModalOpen(false);
+    setEditingFieldKey(null);
+  };
+
+  // Get current field data for the modal
+  const modalFieldLabel = editingFieldKey ? editingFieldKey.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()) : '';
+  const modalInitialValue = editingFieldKey ? formData[editingFieldKey].value : '';
+
+
   return (
     <div className={styles.soWEditor}>
       <h1>Statement of Work Editor</h1>
@@ -94,7 +119,7 @@ const SoWEditor = () => {
         onImportJson={handleImport}
         onExportJson={handleExport}
         onGenerateDocument={handleGenerateDocument}
-        onTemplateFileSelect={handleTemplateFileSelect} // Pass handler for template selection
+        onTemplateFileSelect={handleTemplateFileSelect}
         isLoading={isLoading}
       />
 
@@ -113,9 +138,20 @@ const SoWEditor = () => {
             locked={field.locked}
             onValueChange={(newValue) => handleFieldChange(key, newValue)}
             onLockToggle={() => handleLockToggle(key)}
+            onExpandRequest={() => handleExpandRequest(key)} // Pass expand request handler
           />
         ))}
       </div>
+
+      {isModalOpen && (
+        <ExpandableModal
+          label={modalFieldLabel}
+          initialValue={modalInitialValue}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSave={handleModalSave}
+        />
+      )}
     </div>
   );
 };
