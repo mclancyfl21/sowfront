@@ -4,7 +4,7 @@ import { useState } from 'react';
 const initialSoWData = {
     "project_title_and_document_information": "Test Case: Partial Data Rendering SOW",
     "parties_involved": "Client: Beta Solutions | Vendor: Mash Technology Group",
-    "project_ob`jectives_and_business_drivers": "add appropirate details here",
+    "project_objectives_and_business_drivers": "add appropirate details here",
     "scope_of_work": "Implementation of core HRIS Time & Attendance module.",
     "in_scope_modules_and_functionality": "Time tracking, leave requests, and supervisor approvals.",
     "out_of_scope_items": "add appropirate details here",
