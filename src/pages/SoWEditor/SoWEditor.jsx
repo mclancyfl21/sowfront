@@ -4,6 +4,7 @@ import FormField from '../../components/FormField/FormField';
 import ActionBar from '../../components/ActionBar/ActionBar';
 import ExpandableModal from '../../components/ExpandableModal/ExpandableModal'; // Import ExpandableModal
 import { importJsonFile } from '../../lib/jsonUtils';
+import { base64ToBlob } from '../../lib/fileUtils'; // Import the new utility
 
 import styles from './SoWEditor.module.css';
 
@@ -115,13 +116,11 @@ const SoWEditor = () => {
 
         const result = await response.json();
         if (result.file_content_base64) {
-          // Decode the base64 DOCX content returned from Lambda
-          const decodedDocxBytes = atob(result.file_content_base64);
-          const docxUint8Array = new Uint8Array(decodedDocxBytes.length);
-          for (let i = 0; i < decodedDocxBytes.length; i++) {
-            docxUint8Array[i] = decodedDocxBytes.charCodeAt(i);
-          }
-          const blob = new Blob([docxUint8Array], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+          // Use the utility function to convert base64 to Blob
+          const blob = base64ToBlob(
+            result.file_content_base64,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          );
           
           // Trigger download
           const url = URL.createObjectURL(blob);
